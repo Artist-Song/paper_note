@@ -142,3 +142,56 @@ transformer是一个完全基于自注意力机制的一个模型，这里就不
 
 ### 生成网络（Generative Network）
 
+在生成网络中，VAE取决于transformer每一步的输出dt，这个输出帮助VAE考虑时间隐变量z。
+
+transformer的输出被当作transanomaly的内部记忆，包含了输入窗口（input window）z1：T的全局信息。也就是说，在生成xt prime的时候，每一步的信息都被考虑在内。
+
+隐随机变量的先验过渡概率分布遵循GTF，作者用GTF来表达过渡概率p(zt|zt−1)，到底GTF是怎么表示的，这个可以先不作为重点考虑。
+
+在生成网络，可以获得
+
+![image-20220527093613728](C:\Users\76705\AppData\Roaming\Typora\typora-user-images\image-20220527093613728.png)
+
+Transformerθ是一个堆叠函数，by N TransformerBlock。可以捕获Z1：T的时序结构。
+
+![image-20220527093837396](C:\Users\76705\AppData\Roaming\Typora\typora-user-images\image-20220527093837396.png)
+
+这是原文，主要是讲述了作者在使用transformer时的参数。
+
+![image-20220527093923919](C:\Users\76705\AppData\Roaming\Typora\typora-user-images\image-20220527093923919.png)
+
+第三个图代表了作者的网络结构。
+
+### 变分网络（Variational Network）
+
+![image-20220527094254357](C:\Users\76705\AppData\Roaming\Typora\typora-user-images\image-20220527094254357.png)
+
+![image-20220527094303437](C:\Users\76705\AppData\Roaming\Typora\typora-user-images\image-20220527094303437.png)
+
+这里是讲变分网络的原文，篇幅很短，总结来说就是说变分网络也是用的transformer的模型，没有做太多的改变。
+
+
+
+### 优化目标和异常分数
+
+整个架构还是和VAE一样的，只是里面的方法变成了transformer。这点要注意。
+
+ELBO，变分下界，训练的主要目标就是为了使其最小。上面提到，我们用蒙特卡洛积分法来估计ELBO,
+
+![image-20220527094729126](C:\Users\76705\AppData\Roaming\Typora\typora-user-images\image-20220527094729126.png)
+
+L是样本的size。
+
+用adam optimizer来使上面的损失函数最小化。
+
+我们用重构概率（reconstruction probability）当作我们的异常分数，也就是
+
+score =log(pθ(xt|z1:T ))
+
+如果一个数据点低于阈值，就说明是异常点，我们用POT自动决定这个阈值。
+
+### 在线检测
+
+![image-20220527095031472](C:\Users\76705\AppData\Roaming\Typora\typora-user-images\image-20220527095031472.png)
+
+### 
